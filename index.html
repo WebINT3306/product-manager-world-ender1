@@ -1,11 +1,144 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+  <style></style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Sản phẩm</title>
 </head>
-<body>
 
+<body>
+  <h2>Thêm sản phẩm</h2>
+  <input type="text" id="input-name" placeholder="Tên sản phẩm">
+  <input type="text" id="input-category" placeholder="Danh mục">
+  <input type="number" id="input-price" placeholder="Đơn giá">
+  <input type="number" id="input-quantity" placeholder="Số lượng">
+
+  <button id="btn-add">Thêm mới</button>
+
+  <div>
+    <h2>Danh sách</h2>
+    <table id="product-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th id="sort-name" style="cursor: pointer;">Tên sản phẩm <span id="sort-icon"></span></th>
+          <th>Danh mục</th>
+          <th>Đơn giá</th>
+          <th>Số lượng</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let products = [];
+
+    let isAscending = true;
+
+    function renderTable() {
+      const tbody = document.getElementById("table-body");
+
+      // 1. Xóa nội dung cũ
+      tbody.innerHTML = "";
+
+      // 2. Dùng vòng lặp (for hoặc forEach) để đi qua mảng products
+      products.forEach(function (item, index) {
+        const rowHTML = `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${item.name}</td>
+        <td>${item.category}</td>
+        <td>${item.price}</td>
+        <td>${item.quantity}</td>
+      </tr>
+    `;
+
+        // 4. Cộng dồn mã HTML dòng đó vào thân bảng
+        tbody.innerHTML += rowHTML;
+      });
+    }
+
+
+    // AJAX
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'products.json');
+
+    xhr.onreadystatechange = function () {
+      // 4 nghĩa là xong vòng nhận dữ liệu, 200 là thành công
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // Ép chuỗi JSON thành dữ liệu mảng JavaScript và gán vào biến products ở Khối 1
+        products = JSON.parse(xhr.responseText);
+
+        renderTable();
+      }
+    };
+
+    xhr.send();
+
+    // them san pham
+    const btnAdd = document.getElementById("btn-add");
+
+    btnAdd.addEventListener("click", function () {
+      const nameValue = document.getElementById("input-name").value.trim();
+      const catValue = document.getElementById("input-category").value.trim();
+      const priceValue = parseFloat(document.getElementById("input-price").value);
+      const qtyValue = parseInt(document.getElementById("input-quantity").value);
+
+      if (nameValue.length < 3) {
+        alert("Tên sản phẩm phải có ít nhất 3 ký tự!");
+        return;
+      }
+      if (priceValue <= 0 || isNaN(priceValue)) {
+        alert("Don gia phai la so duong");
+        return;
+      }
+      if (qtyValue < 0 || isNaN(qtyValue)) {
+        alert("So luong phai la so nguyen duong");
+        return;
+      }
+
+      const newProduct = {
+        id: products.length + 1,
+        name: nameValue,
+        category: catValue,
+        price: priceValue,
+        quantity: qtyValue
+      };
+      products.push(newProduct);
+      renderTable();
+      document.getElementById("input-name").value = "";
+      document.getElementById("input-category").value = "";
+      document.getElementById("input-price").value = "";
+      document.getElementById("input-quantity").value = "";
+    })
+
+    //sap xep
+    const sortHeader = document.getElementById("sort-name");
+    const sortIcon = document.getElementById("sort-icon");
+
+    sortHeader.addEventListener("click", function () {
+      products.sort(function (a, b) {
+        if (isAscending) {
+          return a.name.localeCompare(b.name);
+        } else {
+          return b.name.localeCompare(a.name);
+        }
+      });
+
+      if (isAscending) {
+        sortIcon.innerText = "▲";
+      } else {
+        sortIcon.innerText = "▼";
+      }
+
+      isAscending = !isAscending;
+      renderTable();
+    })
+  </script>
 </body>
+
 </html>
