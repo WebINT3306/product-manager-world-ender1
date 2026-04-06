@@ -40,7 +40,7 @@
     let isAscending = true;
 
     function renderTable() {
-      const tbody = document.getElementById("table-body");
+      const tbody = document.querySelector("#product-table tbody") || document.getElementById("table-body");
 
       // 1. Xóa nội dung cũ
       tbody.innerHTML = "";
